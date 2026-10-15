@@ -127,7 +127,7 @@ test('AEPCPublicPortal', async ({ browser }) => {
     await page1.locator("#Login").click();
     await page1.locator("#password").fill(SFPassword);
     await page1.locator("#Login").click();
-    await page1.locator("button[type='button']").waitFor({state:'visible'});
+    await page1.locator("button[type='button']").waitFor({ state: 'visible' });
     await page1.locator("button[type='button']").click();
     await page1.waitForSelector("div span[title='BioConnect']");
     await page1.waitForTimeout(5000);
@@ -141,9 +141,9 @@ test('AEPCPublicPortal', async ({ browser }) => {
     await page1.getByRole('button', { name: 'Search' }).click();
     const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
     await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
-    const salesforceIDnumber =  page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0);
-    await salesforceIDnumber.waitFor({state: 'visible',timeout: 15000}).catch(() => {});
-    
+    const salesforceIDnumber = page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0);
+    await salesforceIDnumber.waitFor({ state: 'visible', timeout: 15000 }).catch(() => { });
+
     if (await salesforceIDnumber.isVisible()) {
         console.log(`Case is visible. Clicking the ${salesforceIDnumber}.`);
         await salesforceIDnumber.click();
@@ -158,10 +158,13 @@ test('AEPCPublicPortal', async ({ browser }) => {
         }
         await page1.getByRole('button', { name: 'Search' }).click();
         const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
-        await searchBox.pressSequentially(AEPC_CaseNumber,{ delay: 50 });
-        await salesforceIDnumber.waitFor({state:'visible'});
-        await salesforceIDnumber.click();
-        console.log(await salesforceIDnumber.textContent());
+        await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
+        await searchBox.press('Enter');
+        const SalesforceID = page1.locator("a[class*='outputLookupLink slds-truncate outputLookupLink-']").first();
+        await SalesforceID.waitFor({ state: 'visible' });
+        await SalesforceID.click();
+        await page1.getByRole('button', { name: `Close ${AEPC_CaseNumber} - Search` }).click();
+        
     }
     // await page1.locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).click();
     await page1.getByRole('tab', { name: 'Details' }).waitFor({ state: 'visible' });
