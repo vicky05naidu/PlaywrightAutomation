@@ -31,7 +31,7 @@ test.beforeAll(async () => {
 
 });
 
-test('@Webst Client App login', async ({ page }) => {
+test('Client App login API', async ({ page }) => {
 
    page.addInitScript(value => {
       window.localStorage.setItem('token', value);
