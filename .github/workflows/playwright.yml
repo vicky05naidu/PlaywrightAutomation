@@ -3,6 +3,7 @@ name: Playwright Tests
 on:
   push:
     branches: [main, master]
+
   pull_request:
     branches: [main, master]
 
@@ -10,6 +11,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
+    env:
+      PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
 
     steps:
       - name: Checkout repository
@@ -28,18 +32,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Run Playwright tests
-        env:
-          PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
-      # Run AEPC scripts in one worker
-        run: npx playwright test tests/AEPCinitialversion.spec.js tests/AEPC.spec.js --config=playwright.service.config.js --workers=1
-      # Run all remaining test scripts in parallel
-      - name: Run remaining Playwright tests
-        run: npx playwright test --config=playwright.service.config.js --workers=4 --grep-invert "AEPCPublicPortal|AEPCPublicPortalPOM"
-      
+      # Run AEPC scripts sequentially with one worker
+      - name: Run AEPC tests - 1 Worker
+        run: |
+          npx playwright test tests/AEPCinitialversion.spec.js tests/AEPC.spec.js --config=playwright.service.config.js --workers=1
 
-      
+      # Run remaining tests in parallel with four workers
+      - name: Run remaining Playwright tests - 4 Workers
+        run: |
+          npx playwright test --config=playwright.service.config.js --workers=4 --grep-invert "AEPCPublicPortal|AEPCPublicPortalPOM"
 
+      # Upload the Playwright report
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
