@@ -106,9 +106,11 @@ test('AEPCPublicPortalPOM', async ({ browser }) => {
         const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
         await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
         await searchBox.press('Enter');
-        const SalesforceID = page1.locator("a[class*='outputLookupLink slds-truncate outputLookupLink-']").first();
-        await SalesforceID.waitFor({ state: 'visible' });
-        await SalesforceID.click();
+        await page1.locator("div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']").first().click();
+        await page1.locator("th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']").first().click();
+        // const SalesforceID = page1.locator("a[class*='outputLookupLink slds-truncate outputLookupLink-']").first();
+        // await SalesforceID.waitFor({ state: 'visible' });
+        // await SalesforceID.click();
         await page1.getByRole('button', { name: `Close ${AEPC_CaseNumber} - Search` }).click();
         
     }

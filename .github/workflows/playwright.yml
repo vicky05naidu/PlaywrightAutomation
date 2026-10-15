@@ -31,13 +31,12 @@ jobs:
       - name: Run Playwright tests
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
-        run: npx playwright test tests/AEPCinitialversion.spec.js --workers=1
+      # Run AEPC scripts in one worker
+        run: npx playwright test tests/AEPCinitialversion.spec.js tests/AEPC.spec.js --workers=1
       # Run all remaining test scripts in parallel
       - name: Run remaining Playwright tests
         run: npx playwright test --config=playwright.service.config.js --workers=4 --grep-invert "AEPCPublicPortal|AEPCPublicPortalPOM"
-        # Run AEPC POM sequentially
-      - name: Run AEPC POM
-        run: npx playwright test tests/AEPC.spec.js --workers=1
+      
 
       
 
