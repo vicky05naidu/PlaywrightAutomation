@@ -86,10 +86,29 @@ test('AEPCPublicPortal', async ({ browser }) => {
     }
     await page1.getByRole('button', { name: 'Search' }).click();
     const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
-    await searchBox.pressSequentially(AEPC_CaseNumber,{delay:500});
-    const salesforceIDnumber= await page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).textContent();
-    console.log(salesforceIDnumber);
-    await page1.locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).click();
+    await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
+    const salesforceIDnumber =  page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0);
+    await salesforceIDnumber.waitFor({state: 'visible',timeout: 10000}).catch(() => {});
+    console.log(salesforceIDnumber.textContent());
+    if (await salesforceIDnumber.isVisible()) {
+        console.log(`Case is visible. Clicking the ${salesforceIDnumber}.`);
+        await salesforceIDnumber.click();
+    } else {
+        console.log("Case is not visible. Refreshing Salesforce.");
+        await page1.reload();
+        await page1.waitForSelector("div span[title='BioConnect']");
+        await page1.waitForTimeout(5000);
+        while (await closeButtons.count() > 0) {
+            await closeButtons.first().click();
+            await page1.waitForTimeout(1000);
+        }
+        await page1.getByRole('button', { name: 'Search' }).click();
+        const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
+        await searchBox.pressSequentially(AEPC_CaseNumber,{ delay: 50 });
+        await salesforceIDnumber.waitFor({state:'visible'});
+        await salesforceIDnumber.click();
+    }
+    // await page1.locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).click();
     await page1.getByRole('tab', { name: 'Details' }).waitFor({ state: 'visible' });
     await page1.getByRole('link', { name: 'Related Cases (2)' }).click();
     await expect(page1.getByRole('link', { name: 'Product Complaint Management' })).toBeVisible();
