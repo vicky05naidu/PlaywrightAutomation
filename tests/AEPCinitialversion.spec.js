@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 // import {patientFlowPage} from '../pageobjects/patientFlowPage';
 
 test('AEPCPublicPortal', async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(90000);
     //parameters
     const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
     const SFURL = "https://amgenbioconnect--fullcopy1.sandbox.my.salesforce.com/";

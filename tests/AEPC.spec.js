@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import patientFlowPage from '../pageobjects/patientFlowPage';
 
 test('AEPCPublicPortalPOM', async ({ browser }) => {
-    test.setTimeout(180000);
+    test.setTimeout(90000);
     //Parameters
     //URL
     const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
