@@ -86,7 +86,7 @@ test('AEPCPublicPortal', async ({ browser }) => {
     }
     await page1.getByRole('button', { name: 'Search' }).click();
     const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
-    await searchBox.pressSequentially(AEPC_CaseNumber);
+    await searchBox.pressSequentially(AEPC_CaseNumber,{delay:500});
     const salesforceIDnumber= await page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).textContent();
     console.log(salesforceIDnumber);
     await page1.locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).click();
