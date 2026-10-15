@@ -31,7 +31,7 @@ jobs:
       - name: Run Playwright tests
         env:
           PLAYWRIGHT_SERVICE_URL: ${{ vars.PLAYWRIGHT_SERVICE_URL }}
-        run: npx playwright test --config=playwright.service.config.js --workers=2
+        run: npx playwright test --config=playwright.service.config.js --workers=1
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
