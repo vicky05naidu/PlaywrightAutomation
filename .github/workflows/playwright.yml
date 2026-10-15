@@ -31,16 +31,10 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Run AEPC scripts sequentially with one worker
-      - name: Run AEPC tests - 1 Worker
-        run: |
-          npx playwright test tests/AEPCinitialversion.spec.js tests/AEPC.spec.js --config=playwright.service.config.js --workers=1
-
       # Run remaining tests in parallel with four workers
       - name: Run remaining Playwright tests - 4 Workers
         run: |
-          npx playwright test --config=playwright.service.config.js --workers=4 --grep-invert "AEPCPublicPortal|AEPCPublicPortalPOM"
+          npx playwright test --config=playwright.service.config.js --workers=4 
 
       # Upload the Playwright report
       - name: Upload Playwright report
