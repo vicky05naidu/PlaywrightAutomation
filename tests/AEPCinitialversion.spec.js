@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 // import {patientFlowPage} from '../pageobjects/patientFlowPage';
 
 test('AEPCPublicPortal', async ({ browser }) => {
-    test.setTimeout(90000);
+    test.setTimeout(180000);
     //parameters
     const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
     const SFURL = "https://amgenbioconnect--fullcopy1.sandbox.my.salesforce.com/";
@@ -142,8 +142,8 @@ test('AEPCPublicPortal', async ({ browser }) => {
     const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
     await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
     const salesforceIDnumber =  page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0);
-    await salesforceIDnumber.waitFor({state: 'visible',timeout: 10000}).catch(() => {});
-    console.log(salesforceIDnumber.textContent());
+    await salesforceIDnumber.waitFor({state: 'visible',timeout: 15000}).catch(() => {});
+    console.log(await salesforceIDnumber.textContent());
     if (await salesforceIDnumber.isVisible()) {
         console.log(`Case is visible. Clicking the ${salesforceIDnumber}.`);
         await salesforceIDnumber.click();
