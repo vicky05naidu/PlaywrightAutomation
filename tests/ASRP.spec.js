@@ -9,7 +9,7 @@ test('Capture ASRP Login', async ({ page }) => {
     await page.getByRole('textbox', { name: 'Enter Password' }).pressSequentially("Password@12345", { delay: 50 });
     await page.locator('#disable').getByRole('img').click();
     await page.locator('#disable').getByRole('button', { name: 'LOG IN' }).click();
-    await page.waitForLoadState('networkidle');
+    await page.getByText('Yogaraj').waitFor({state:'visible'});
     await expect(page.getByText('Yogaraj')).toBeVisible();
     
 });
