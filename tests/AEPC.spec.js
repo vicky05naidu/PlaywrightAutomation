@@ -1,56 +1,48 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
 import patientFlowPage from '../pageobjects/patientFlowPage';
+import AEPCTestData from '../data/AEPCTestData';
+
+dotenv.config();
 
 test('AEPCPublicPortalPOM', async ({ browser }) => {
-    test.setTimeout(90000);
-    //Parameters
-    //URL
-    const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
-    //Patient
-    const PatFN = "TestPatient";
-    const PatLN = "User";
-    const PatPhone = "1234567890";
-    const PatEmail = "pattest@email.com";
-    const PatAddress = "test address patient";
-    const PatState = "Alabama";
-    const PatCity = "TestCity";
-    const PatPostalCode = "54321 MTH";
-    const PatDOBYear = "2000";
-    const PatDOBMonth = "Jan";
-    const PatDOBDay = "05";
-    const PatGender = "Male";
-    //HCP
-    const HCPFN = "TestHCP";
-    const HCPLN = "UserHCP";
-    const HCPPhone = "5432154321";
-    const HCPEmail = "hcptest@email.com";
-    const HCPType = "Physician";
-    //Product
-    const Product = "Enbrel";
-    const DosageForm = "Sureclick autoinjector 1.5";
-    const ProductStopYear = "2026";
-    const ProductStopMonth = "Jan";
-    const ProductStopDay = "05";
-    const LotBatchNumber = "1011763";
-    //AE
-    const AEDescription = "Demo of AEPC submission -- AE";
-    //PC
-    const PCDescription = `1) What is the issue, including a full description and when it was observed (during preparation, during administration or after use): Testing of PC Section
-2) How many units are involved (if multiple units include the lot/serial# if different lots were used): Testing of PC Section
-3) Who attempted the administration, HCP/Patient/Caregiver/unknown:Testing of PC Section
-4) User experience with the product/delivery system (first time,1-3 mon, 4-6 mon, 7-9 mon, 10-12 mon,> 12 mon, unknown):Testing of PC Section
-    If first time user, how were they trained and by whom?Testing of PC Section
-    For SureClick Autoinjector/pre-filled pen: If use < 6 months, did the administrator have previous experience with an auto injector/pre-filled pen type of device?Testing of PC Section
-5) Did the administrator follow the instructions of use? If no, clarify:Testing of PC Section
-6) Was the package/carton received sealed, if no provide details:Testing of PC Section`;
-    const EventDateYear = "2026";
-    const EventDateMonth = "Jan";
-    const EventDateDay = "05";
+    test.setTimeout(300000); // Set test timeout to 5 minutes
+    const {
+        AEPCURL,
+        PatFN,
+        PatLN,
+        PatPhone,
+        PatEmail,
+        PatAddress,
+        PatState,
+        PatCity,
+        PatPostalCode,
+        PatDOBYear,
+        PatDOBMonth,
+        PatDOBDay,
+        PatGender,
+        HCPFN,
+        HCPLN,
+        HCPPhone,
+        HCPEmail,
+        HCPType,
+        Product,
+        DosageForm,
+        ProductStopYear,
+        ProductStopMonth,
+        ProductStopDay,
+        LotBatchNumber,
+        AEDescription,
+        PCDescription,
+        EventDateYear,
+        EventDateMonth,
+        EventDateDay
+    } = AEPCTestData;
 
     //Salesforce
     const SFURL = "https://amgenbioconnect--fullcopy1.sandbox.my.salesforce.com/";
-    const SFUsername = "yvenka01@amgen.com.fullcopy1";
-    const SFPassword = "Fullcopy.01";
+    const SFUsername = process.env.SF_USERNAME;
+    const SFPassword = process.env.SF_PASSWORD;
 
     //TestCase
     const context = await browser.newContext();
@@ -75,9 +67,9 @@ test('AEPCPublicPortalPOM', async ({ browser }) => {
     await page1.locator("#Login").click();
     await page1.locator("button[type='button']").waitFor({ state: 'visible' });
     await page1.locator("button[type='button']").click();
-    await page1.waitForSelector("div span[title='BioConnect']");
-    await page1.waitForTimeout(5000);
+    await page1.locator("div span[title='BioConnect']").waitFor({ state: 'visible', timeout: 30000 });
     const tabBar = page1.locator('ul.tabBarItems.slds-grid');
+    await tabBar.waitFor({ state: 'visible', timeout: 20000 }).catch(() => { });
     const closeButtons = tabBar.locator('button[title^="Close "]');
     while (await closeButtons.count() > 0) {
         await closeButtons.first().click();
@@ -96,9 +88,9 @@ test('AEPCPublicPortalPOM', async ({ browser }) => {
         await salesforceIDnumber.click();
     } else {
         console.log("Case is not visible. Refreshing Salesforce.");
-        await page1.reload();
-        await page1.waitForSelector("div span[title='BioConnect']");
-        await page1.waitForTimeout(5000);
+        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.locator("div span[title='BioConnect']").waitFor({ state: 'visible', timeout: 30000 });
+        // await closeButtons.first().waitFor({ state: 'visible', timeout: 30000 });
         while (await closeButtons.count() > 0) {
             await closeButtons.first().click();
             await page1.waitForTimeout(1000);
@@ -107,20 +99,28 @@ test('AEPCPublicPortalPOM', async ({ browser }) => {
         const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
         await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
         await searchBox.press('Enter');
-        await page1.reload({ waitUntil: 'domcontentloaded' });
-        await page1.reload({ waitUntil: 'domcontentloaded' });
-        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.locator(
+            "div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']"
+        ).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { });
         await page1.locator(
             "div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']"
         ).first().click();
+        const caseID = await page1.locator(
+            "th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']"
+        ).first().textContent();
+        console.log(`Case ID: ${caseID}`);
         await page1.locator(
             "th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']"
         ).first().click();
         await page1.getByRole('button', { name: `Close ${AEPC_CaseNumber} - Search` }).click();
+        await page1.locator(`li a[title="${caseID} | Case"]`).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+        await page1.locator(`li a[title="${caseID} | Case"]`).first().click();
     }
 
     await page1.getByRole('tab', { name: 'Details' }).waitFor({ state: 'visible' });
     await page1.getByRole('link', { name: 'Related Cases (2)' }).click();
+    await expect(page1.getByRole('link', { name: `${AEPC_CaseNumber}-PC-01` })).toBeVisible();
     await expect(page1.getByRole('link', { name: 'Product Complaint Management' })).toBeVisible();
+    await expect(page1.getByRole('link', { name: `${AEPC_CaseNumber}-SR-01` })).toBeVisible();
     await expect(page1.getByRole('link', { name: 'Safety Report' })).toBeVisible();
 });

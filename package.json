@@ -12,6 +12,7 @@
     "@azure/identity": "^4.13.3",
     "@azure/playwright": "^1.1.6",
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "dotenv": "^18.0.8"
   }
 }

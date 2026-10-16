@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
+import dotenv from 'dotenv';
 // import {patientFlowPage} from '../pageobjects/patientFlowPage';
 
 test('AEPCPublicPortal', async ({ browser }) => {
-    test.setTimeout(90000);
+    test.setTimeout(300000); // Set test timeout to 5 minutes
     //parameters
     const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
     const SFURL = "https://amgenbioconnect--fullcopy1.sandbox.my.salesforce.com/";
-    const SFUsername= "yvenka01@amgen.com.fullcopy1";
-    const SFPassword = "Fullcopy.01";
+    const SFUsername = process.env.SF_USERNAME;
+    const SFPassword = process.env.SF_PASSWORD;
 
 
     const context = await browser.newContext();
@@ -129,9 +130,9 @@ test('AEPCPublicPortal', async ({ browser }) => {
     await page1.locator("#Login").click();
     await page1.locator("button[type='button']").waitFor({ state: 'visible' });
     await page1.locator("button[type='button']").click();
-    await page1.waitForSelector("div span[title='BioConnect']");
-    await page1.waitForTimeout(5000);
+    await page1.locator("div span[title='BioConnect']").waitFor({ state: 'visible', timeout: 30000 });
     const tabBar = page1.locator('ul.tabBarItems.slds-grid');
+    await tabBar.waitFor({ state: 'visible', timeout: 20000 }).catch(() => { });
     const closeButtons = tabBar.locator('button[title^="Close "]');
     while (await closeButtons.count() > 0) {
         await closeButtons.first().click();
@@ -150,9 +151,9 @@ test('AEPCPublicPortal', async ({ browser }) => {
         await salesforceIDnumber.click();
     } else {
         console.log("Case is not visible. Refreshing Salesforce.");
-        await page1.reload();
-        await page1.waitForSelector("div span[title='BioConnect']");
-        await page1.waitForTimeout(5000);
+        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.locator("div span[title='BioConnect']").waitFor({ state: 'visible', timeout: 30000 });
+        // await closeButtons.first().waitFor({ state: 'visible', timeout: 30000 });
         while (await closeButtons.count() > 0) {
             await closeButtons.first().click();
             await page1.waitForTimeout(1000);
@@ -161,20 +162,28 @@ test('AEPCPublicPortal', async ({ browser }) => {
         const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
         await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
         await searchBox.press('Enter');
-        await page1.reload({ waitUntil: 'domcontentloaded' });
-        await page1.reload({ waitUntil: 'domcontentloaded' });
-        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.locator(
+            "div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']"
+        ).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => { });
         await page1.locator(
             "div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']"
         ).first().click();
+        const caseID = await page1.locator(
+            "th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']"
+        ).first().textContent();
+        console.log(`Case ID: ${caseID}`);
         await page1.locator(
             "th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']"
         ).first().click();
         await page1.getByRole('button', { name: `Close ${AEPC_CaseNumber} - Search` }).click();
+        await page1.locator(`li a[title="${caseID} | Case"]`).first().waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
+        await page1.locator(`li a[title="${caseID} | Case"]`).first().click();
     }
 
     await page1.getByRole('tab', { name: 'Details' }).waitFor({ state: 'visible' });
     await page1.getByRole('link', { name: 'Related Cases (2)' }).click();
+    await expect(page1.getByRole('link', { name: `${AEPC_CaseNumber}-PC-01` })).toBeVisible();
     await expect(page1.getByRole('link', { name: 'Product Complaint Management' })).toBeVisible();
+    await expect(page1.getByRole('link', { name: `${AEPC_CaseNumber}-SR-01` })).toBeVisible();
     await expect(page1.getByRole('link', { name: 'Safety Report' })).toBeVisible();
 });
