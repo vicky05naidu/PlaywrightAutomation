@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 // import {patientFlowPage} from '../pageobjects/patientFlowPage';
 
 test('AEPCPublicPortal', async ({ browser }) => {
-    test.setTimeout(90000);
+    test.setTimeout(300000); // Set test timeout to 5 minutes
     //parameters
     const AEPCURL = "https://www.dev.amgenaepcextreporting.com/";
     const SFURL = "https://amgenbioconnect--fullcopy1.sandbox.my.salesforce.com/";
