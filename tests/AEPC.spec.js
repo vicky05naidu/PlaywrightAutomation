@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import patientFlowPage from '../pageobjects/patientFlowPage';
 
-test('AEPCPublicPortal', async ({ browser }) => {
+test('AEPCPublicPortalPOM', async ({ browser }) => {
     test.setTimeout(90000);
     //Parameters
     //URL
@@ -73,7 +73,7 @@ test('AEPCPublicPortal', async ({ browser }) => {
     await page1.locator("#Login").click();
     await page1.locator("#password").fill(SFPassword);
     await page1.locator("#Login").click();
-    await page1.waitForSelector("button[type='button']");
+    await page1.locator("button[type='button']").waitFor({ state: 'visible' });
     await page1.locator("button[type='button']").click();
     await page1.waitForSelector("div span[title='BioConnect']");
     await page1.waitForTimeout(5000);
@@ -82,14 +82,43 @@ test('AEPCPublicPortal', async ({ browser }) => {
     while (await closeButtons.count() > 0) {
         await closeButtons.first().click();
         await page1.waitForTimeout(1000);
-
     }
     await page1.getByRole('button', { name: 'Search' }).click();
     const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
-    await searchBox.pressSequentially(AEPC_CaseNumber,{delay:500});
-    const salesforceIDnumber= await page1.getByRole("listbox").locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).textContent();
-    console.log(salesforceIDnumber);
-    await page1.locator("lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']").nth(0).click();
+    await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
+    const salesforceIDnumber = page1.getByRole("listbox").locator(
+        "lightning-formatted-rich-text[class='primary slds-truncate slds-rich-text-editor__output']"
+    ).nth(0);
+    await salesforceIDnumber.waitFor({ state: 'visible', timeout: 15000 }).catch(() => { });
+
+    if (await salesforceIDnumber.isVisible()) {
+        console.log(`Case is visible. Clicking the ${salesforceIDnumber}.`);
+        await salesforceIDnumber.click();
+    } else {
+        console.log("Case is not visible. Refreshing Salesforce.");
+        await page1.reload();
+        await page1.waitForSelector("div span[title='BioConnect']");
+        await page1.waitForTimeout(5000);
+        while (await closeButtons.count() > 0) {
+            await closeButtons.first().click();
+            await page1.waitForTimeout(1000);
+        }
+        await page1.getByRole('button', { name: 'Search' }).click();
+        const searchBox = page1.getByRole('searchbox', { name: 'Search...' });
+        await searchBox.pressSequentially(AEPC_CaseNumber, { delay: 50 });
+        await searchBox.press('Enter');
+        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.reload({ waitUntil: 'domcontentloaded' });
+        await page1.locator(
+            "div h2 a[class*='slds-card__header-title slds-text-link slds-show--inline-block uiOutputURL']"
+        ).first().click();
+        await page1.locator(
+            "th a[class*='slds-truncate outputLookupLink slds-truncate outputLookupLink-']"
+        ).first().click();
+        await page1.getByRole('button', { name: `Close ${AEPC_CaseNumber} - Search` }).click();
+    }
+
     await page1.getByRole('tab', { name: 'Details' }).waitFor({ state: 'visible' });
     await page1.getByRole('link', { name: 'Related Cases (2)' }).click();
     await expect(page1.getByRole('link', { name: 'Product Complaint Management' })).toBeVisible();
