@@ -35,6 +35,9 @@ jobs:
       - name: Run Playwright tests
         run: |
           npx playwright test --config=playwright.service.config.js --workers=4 
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
 
       # Upload the Playwright report
       - name: Upload Playwright report
