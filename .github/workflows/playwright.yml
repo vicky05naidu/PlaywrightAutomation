@@ -31,8 +31,8 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      # Run remaining tests in parallel with four workers
-      - name: Run remaining Playwright tests - 4 Workers
+      # Run tests in parallel with four workers
+      - name: Run Playwright tests
         run: |
           npx playwright test --config=playwright.service.config.js --workers=4 
 
