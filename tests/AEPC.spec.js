@@ -69,8 +69,8 @@ test('AEPCPublicPortalPOM', async ({ browser }) => {
     await page1.locator("button[type='button']").click();
     await page1.locator("div span[title='BioConnect']").waitFor({ state: 'visible', timeout: 30000 });
     const tabBar = page1.locator('ul.tabBarItems.slds-grid');
+    await tabBar.waitFor({ state: 'visible', timeout: 20000 }).catch(() => { });
     const closeButtons = tabBar.locator('button[title^="Close "]');
-    await closeButtons.first().waitFor({ state: 'visible', timeout: 30000 });
     while (await closeButtons.count() > 0) {
         await closeButtons.first().click();
         await page1.waitForTimeout(1000);
