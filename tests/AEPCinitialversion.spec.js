@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-import dotenv from 'dotenv';
-// import {patientFlowPage} from '../pageobjects/patientFlowPage';
+
 
 test('AEPCPublicPortal', async ({ browser }) => {
     test.setTimeout(300000); // Set test timeout to 5 minutes
