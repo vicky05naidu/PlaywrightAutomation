@@ -7,3 +7,12 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 .env
+/.github/agents/
+/.playwright-mcp/
+/.vscode/
+/specs/
+tests/seed.spec.js
+.mcp.json
+
+
+
